@@ -6,14 +6,16 @@ from typing import Dict
 #update, this is going to be text classification model to tell apart sentences with correct grammar
 #and incorrect grammar
 
-#check https://medium.com/data-and-beyond/complete-guide-to-building-bert-model-from-sratch-3e6562228891
-
-#this will be the bert model, which I will code up in the next commit
+#this will be the bert model, which I will code up in the next commit, or at least part of it.
+#goal is to code all the components I need, then after looking after the architecture I'll combine
+#them in a way that can make the bert done done. it gonna be fun and painful but it gonna be fun
 class TextClassification(nn.Module):
     def __init__(self, input_shape, hidden_layers, output_shape) -> None:
         
         pass
 
+    def forward(self) -> torch.Tensor:
+        pass
 
 class SelfAttention(nn.Module):
         #this represents an individual attention mechanism which can be run in parallel with more 
@@ -62,6 +64,7 @@ class SelfAttention(nn.Module):
         torch.einsum("") #i gotta do some linear math here with some stuff
 
 
+
 class MultiHeadedAttention(nn.Module):
     def __init__(self, *args, **kwargs) -> None:
         pass
@@ -69,5 +72,7 @@ class MultiHeadedAttention(nn.Module):
         #cus boy do i aint got a lotta time, only a few hours at night at most. why did i do this to
         #myself
 
-        
+    def forward(self) -> torch.Tensor:
+        pass
+
 
