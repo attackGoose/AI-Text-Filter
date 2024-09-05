@@ -4,7 +4,10 @@ from torch import nn
 from typing import Dict
 
 #update, this is going to be text classification model to tell apart sentences with correct grammar
-#and incorrect grammar
+#and incorrect grammar and to make sure the language outputted isn't offensive
+#it will also test if the model's output sentence makes sense given the context of the previous sentence
+
+
 
 #this will be the bert model, which I will code up in the next commit, or at least part of it.
 #goal is to code all the components I need, then after looking after the architecture I'll combine
@@ -17,7 +20,7 @@ class TextClassification(nn.Module):
     def forward(self) -> torch.Tensor:
         pass
 
-class SelfAttention(nn.Module):
+class MultiheadedAttention(nn.Module): #thi is the self-attention mechanism, of which also includes position encoding of data but this is also important
         #this represents an individual attention mechanism which can be run in parallel with more 
         #attention mechanisms
         
@@ -43,6 +46,7 @@ class SelfAttention(nn.Module):
         self.query = nn.Linear(in_features=self.head_dim,
                                 out_features=self.head_dim,
                                 bias=False)
+        
 
         self.fully_connected_out = nn.Linear(in_features=self.embed_size, #this should be the number of heads times the head dimension, which should be equal to the embed_size
                                              out_features=self.embed_size)
@@ -63,16 +67,5 @@ class SelfAttention(nn.Module):
 
         torch.einsum("") #i gotta do some linear math here with some stuff
 
-
-
-class MultiHeadedAttention(nn.Module):
-    def __init__(self, *args, **kwargs) -> None:
-        pass
-        #this does the parallel thing in the self attentino above to make the training process faster
-        #cus boy do i aint got a lotta time, only a few hours at night at most. why did i do this to
-        #myself
-
-    def forward(self) -> torch.Tensor:
-        pass
 
 
