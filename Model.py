@@ -1,13 +1,20 @@
 import torch
 from torch import nn
-
+import math
 from typing import Dict
-
+from random import Random
 #update, this is going to be text classification model to tell apart sentences with correct grammar
 #and incorrect grammar and to make sure the language outputted isn't offensive
 #it will also test if the model's output sentence makes sense given the context of the previous sentence
 
+"""
+resource: 
 
+https://arxiv.org/pdf/1810.04805, bert architecture paper
+https://proceedings.neurips.cc/paper_files/paper/2017/file/3f5ee243547dee91fbd053c1c4a845aa-Paper.pdf
+
+
+"""
 
 #this will be the bert model, which I will code up in the next commit, or at least part of it.
 #goal is to code all the components I need, then after looking after the architecture I'll combine
@@ -20,6 +27,57 @@ class TextClassification(nn.Module):
     def forward(self) -> torch.Tensor:
         pass
 
+class PositionalEmbedding(nn.Module):
+    def __init__(self, model_dim, max_len=128):
+
+        self.pos_encode = torch.zeros(max_len, model_dim).float() 
+        #position encoding, no more information needed 
+        self.pos_encode.requires_grad = False
+
+        #for every dimension in the value: assign it an encoding, formula is sin(position/(10000^(2i/dimension)))
+        for key_pos in range(max_len): 
+            #key as in each row value, not related to key dimension in later areas of the model
+            for value_pos in range(0, model_dim, 2): 
+                #value as in encoded value
+                self.pos_encode[key_pos, value_pos] = math.sin(key_pos / (10000 ** ((2 * value_pos)/model_dim)))
+                self.pos_encode[key_pos, value_pos + 1] = math.cos(key_pos / (10000 ** ((2 * (value_pos + 1))/model_dim)))
+
+        #give an extra dimension for the batch size (to train faster)
+        self.pos_encode.unsqueeze()
+
+    def forward(self) -> torch.Tensor:
+        return self.pos_encode
+    
+#bert model has its another embedding to further better understand the text
+#required: positional embedding, 
+class BERTEmbedding(nn.Module): 
+    """
+    1. TokenEmbedding : normal embedding matrix
+    2. PositionalEmbedding : adding positional information using sin, cos
+    2. SegmentEmbedding : adding sentence segment info, (sent_A:1, sent_B:2)
+    sum of all these features are output of BERTEmbedding
+    """
+
+    def __init__(self, vocab_size, embed_size, seq_len, dropout):
+        
+        #how many embeddings to add/embedding size of token embedding
+        self.embed_size = embed_size
+
+        #makes the token embedding
+        self.token_embed = nn.Embedding(
+            vocab_size, 
+            embed_size, 
+            padding_idx=0)
+        #makes the segment embedding
+        self.seg_embed = nn.Embedding(
+            5, #random number, I'm still trying to find the actual number from the research paper
+            embedding_dim=embed_size, 
+            padding_idx=0)
+        #sets a random percentage of the inputted values to 0 during training by preventing co-adaptation of neurons
+        self.dropout = nn.Dropout(p=dropout) 
+
+
+
 class MultiheadedAttention(nn.Module): #thi is the self-attention mechanism, of which also includes position encoding of data but this is also important
         #this represents an individual attention mechanism which can be run in parallel with more 
         #attention mechanisms
@@ -29,7 +87,6 @@ class MultiheadedAttention(nn.Module): #thi is the self-attention mechanism, of 
 
     #in a paper, I saw that you can instead pass in a dictionary instead of individual values
     def init(self, config: Dict): #the config dictionary should have embed_size and head values
-        super(SelfAttention, self).init()
 
         self.embed_size = config.embed_size
         self.heads = config.heads
